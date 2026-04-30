@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+	var colorTerm = []string{"screen", "xterm", "vt100", "color", "ansi", "cygwin", "linux"}
+
+	
+
 
 
 func detectColorCap() ColorCap {
@@ -36,44 +40,15 @@ func checkTermEnv() (ColorCap, bool) {
 	if supports16Color(term){
 		return Color16, true
 	}
-	
-	if !supportsNone(term){
-		return Color8, true
-	}
 
 	if supportsNone(term){
 		return ColorNone, true
 	}
 
-	if windowsColorSupport(){
-		return Color8, true
-	}
 	//Detection failed
 	return unknown, false
 }
 
-
-
-func supportsTrueColor(colorTerm string) bool {
-	return colorTerm == "truecolor" || colorTerm == "24bit"
-}
-
-func supports256Color(term string) bool {
-	return strings.Contains(term, "256color")
-}
-
-func supports16Color(term string) bool {
-	return strings.Contains(term, "16color")
-}
-
-func supportsNone(term string) bool {
-	return term == "dumb" || strings.Contains(term, "mono")
-}
-
-func windowsColorSupport() bool {
-	_, exists := os.LookupEnv("ANSICON")
-	return exists
-}
       
 
 
@@ -100,3 +75,43 @@ func queryTput() (ColorCap, bool) {
 
 	return ColorCap(colors), true
 }
+
+
+
+
+
+
+
+func supportsTrueColor(colorTerm string) bool {
+	return colorTerm == "truecolor" || colorTerm == "24bit"
+}
+
+func supports256Color(term string) bool {
+	return strings.Contains(term, "256color")
+}
+
+func supports16Color(term string) bool {
+	return strings.Contains(term, "16color") || supportsColor(term)
+}
+
+func supportsColor(term string) bool {
+	for _, t := range colorTerm {
+		if strings.Contains(term, t) {
+			return true
+		}
+	}
+	return false
+}
+ 
+func supportsNone(term string) bool {
+	return term == "dumb" || strings.Contains(term, "mono")
+}
+
+
+//WIP
+//func windowsColorSupport() bool {
+//	_, exists := os.LookupEnv("ANSICON")
+//	return exists
+//}
+
+

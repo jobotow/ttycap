@@ -16,19 +16,31 @@ const (
 	ColorTrue ColorCap = 16777216
 )
 
+var (
+	colorOff = checkColorToggle("color", "=", colorNegArgs) || checkColorToggle("no-color", "=", colorNegArgs) || checkColorToggle("no-color", "=", colorPosArgs)
+	colorOn = checkColorToggle("color", "=", colorPosArgs)
+	colorAuto = checkColorToggle("color", "=", colorAutoArgs)
+)
+
 //Terminal supports color?
 func SupportsColor() bool {
-	return (!IsDisabled() && IsTerminal()) || detectColorCap() > ColorNone
+	return (!Disabled() && IsTerminal()) || Enabled() || colorAuto /*|| detectColorCap() > ColorNone */
+	//detectColorCap() conflicts with the environment variables as terminal can support colors but NO_COLOR is set
 }
 
 
-func IsDisabled() bool {
+func Disabled() bool {
 	_, exists := os.LookupEnv("NO_COLOR")
-	return exists
+	return exists || colorOff
+}
+
+func Enabled() bool {
+	_, exists := os.LookupEnv("FORCE_COLOR")
+	return exists || colorOn
 }
 
 func Capability() ColorCap {
-	if !IsTerminal() || IsDisabled() {
+	if !IsTerminal() || Disabled() {
 		return ColorNone
 	}
 	return detectColorCap()
