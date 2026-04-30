@@ -24,7 +24,10 @@ func matchNextArg(arg string, seqArgs []string) bool {
 func checkColorToggle(flag, delimiter string, seqArgs []string) bool {
 	nextArg, boolean := getNextArg(flag, delimiter)
 	if boolean{
+		if nextArg != ""{
 		return matchNextArg(nextArg, seqArgs)
+		}
+		return true
 	}
 	return false
 }
