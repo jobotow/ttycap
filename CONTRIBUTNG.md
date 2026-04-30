@@ -21,7 +21,7 @@ go test -v ./...
 ## Issue Guidelines
 **One issue per problem**. This keeps discussions focused and makes tracking easier.
 
-## Before Cretibg An Issue
+## Before Creating An Issue
 - Check existing issues to avoid duplicates.
 - Check if the problem has already being reported or fixed
 
