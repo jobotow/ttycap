@@ -4,7 +4,16 @@ All notable changes to termcolor will be documented in this file
 ## [0.1.1] - 2026-04-30
 
 ### Fixed
+- Made `getNextArg()` and `matchNextArg()` exportable
+
+---
+
+## [0.1.1] - 2026-04-30
+
+### Fixed
 - Color flags without values now return true, which implies flag was present
+
+---
 
 ## [0.1.0] - 2026-04-30
 
