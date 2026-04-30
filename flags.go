@@ -11,7 +11,24 @@ var (
 	colorAutoArgs = []string{"auto", "tty", "detect"}
 )
 
-func matchNextArg(arg string, seqArgs []string) bool {
+
+func checkColorToggle(flag, delimiter string, seqArgs []string) bool {
+	nextArg, boolean := GetNextArg(flag, delimiter)
+	if boolean{
+		if nextArg != ""{
+		return MatchNextArg(nextArg, seqArgs)
+		}
+		return true
+	}
+	return false
+}
+
+
+//=================================
+// PUBLIC API FOR FLAGS PARSING
+//=================================
+
+func MatchNextArg(arg string, seqArgs []string) bool {
 	for _, value := range seqArgs {
 		if arg == value {
 			return true
@@ -21,20 +38,13 @@ func matchNextArg(arg string, seqArgs []string) bool {
 }
 
 
-func checkColorToggle(flag, delimiter string, seqArgs []string) bool {
-	nextArg, boolean := getNextArg(flag, delimiter)
-	if boolean{
-		if nextArg != ""{
-		return matchNextArg(nextArg, seqArgs)
-		}
-		return true
+
+func GetNextArg(flag string, delimiter ...string) (string, bool) {
+	delim := "="
+	if len(delimiter) > 0 {
+		delim = delimiter[0]
 	}
-	return false
-}
-
-
-func getNextArg(flag, delimiter string) (string, bool) {
-	flagDelim := flag+delimiter
+	flagDelim := flag+delim
 	args := os.Args[1:]
 	for i, arg := range args{
 		cleanArg := strings.TrimLeft(arg, "-")

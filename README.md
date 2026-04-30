@@ -130,6 +130,39 @@ func main(){
 
 ---
 
+### Flag Parsing
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/phamio/termcolor"
+)
+
+func main() {
+    //Output format flag
+    format, found := termcolor.GetNextArg("format")
+    if found && termcolor.MatchNextArg(format, []string{"json", "text", "table"}){
+        fmt.Printf("Output format: %s\n", format)
+    }
+
+    //Log level
+    level, found := termcolor.GetNextArg("level", ":") //":" is the delimiter in case of --format:json
+    if found && termcolor.MatchNextArg(level, []string{"debug", "info", "error"}){
+        fmt.Printf("Log level: %s\n", level)
+    }
+
+    _, verbose := termcolor.GetNextArg("verbose")
+    if verbose{
+        fmt.Println("Verbose mode enabled")
+    }
+
+}
+```
+
+---
+
 ## License
 Apache License 2.0 — see [LICENSE](LICENSE) file for details.
 
