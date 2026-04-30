@@ -18,6 +18,49 @@ go test -v ./...
 
 ---
 
+## Issue Guidelines
+**One issue per problem**. This keeps discussions focused and makes tracking easier.
+
+## Before Cretibg An Issue
+- Check existing issues to avoid duplicates.
+- Check if the problem has already being reported or fixed
+
+---
+
+## Issue Template
+```markdown
+**Go version:** `go version`
+**OS:** (e.g., Linux, macOS, Windows 10/11)
+**Termcolor version:** (e.g., v0.1.2)
+
+**Problem description:**
+(What happened? What did you expect?)
+
+**Reproduction code:**
+```go
+// Minimal example that demonstrates the issue
+```
+
+---
+
+## Pull Request Guidelines 
+**Each pull request should address one issue**
+
+---
+
+## Commit Structure
+
+```bash
+# Format
+<type>(<scope>): <description>
+
+# Examples
+fix(parser): treat negative numbers as flag values
+docs(readme): update installation instructions
+```
+
+---
+
 ## Areas for Improvement
 - Windows testing across CMD, Powershell and Windows Terminal
 - Performance optimizations
@@ -31,7 +74,7 @@ go test -v ./...
 - Create a feature branch (git checkout -b feature/name)
 - Ensure all tests pass (go test ./...)
 - Follow Go conventions(go fmt, go lint)
-- Submit a pull request
+- Submit a pull request to the `main` branch
 
 ---
 
