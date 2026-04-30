@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to termcolor will be documented in this file
 
-## [0.1.1] - 2026-04-30
+## [0.1.2] - 2026-04-30
 
 ### Fixed
 - Made `getNextArg()` and `matchNextArg()` exportable
