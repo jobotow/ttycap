@@ -8,60 +8,72 @@ import (
 	"golang.org/x/term"
 )
 
-	
+//Status types for detection results
+type DetectionStatus int
+
+const (
+	Detected DetectionStatus = iota
+	NotTTY
+	ExplicitDisable
+	Uncertain
+)
 
 	
 
+	
 
 
-func detectColorCap(cachedArgs []string, f *os.File) (ColorCap, bool) {
-	if !term.IsTerminal(int(f.Fd())) {
-		return ColorNone, false
+
+func detectColorCap(cachedArgs []string, stream *os.File) (ColorCap, DetectionStatus) {
+	//Check if TTY
+	if !term.IsTerminal(int(stream.Fd())) {
+		return ColorNone, NotTTY
 	}
 
 	//Stream is a tty, now determine level
 	
 	//Check --no-color flags
 	if checkColorToggle(cachedArgs, "no-color", "=", colorNegArgs) || checkColorToggle(cachedArgs, "color", "=", colorNegArgs) || checkColorToggle(cachedArgs,"no-color", "=", colorPosArgs) {
-		return ColorNone, false
+		return ColorNone, ExplicitDisable
 	}
     
 	//Check NO_COLOR env variable
 	if _, exists := os.LookupEnv("NO_COLOR"); exists{
-		return ColorNone, false
+		return ColorNone, ExplicitDisable
 	}
+
 
 	//Check FORCE_COLOR level
 	if cap, ok := getForceColorLevel(); ok {
-		return cap, cap != ColorNone
+		return cap, Detected//cap != ColorNone
 	}
     
 	//CI Systems
 	if cap, ok := getCIColorLevel(); ok{
-		return cap, cap != ColorNone
+		return cap, Detected //cap != ColorNone
 	}
 
 	if cap, ok := getKnownTerminal(); ok{
-		return cap, cap != ColorNone
+		return cap, Detected //cap != ColorNone
 	}
     
 	//Check TERM_PROGRAM
 	if cap, ok := checkTermProgram(); ok{
-		return cap, cap != ColorNone
+		return cap, Detected //cap != ColorNone
 	}
 
 	//Check TERM
 	if cap, ok := checkTermEnv(); ok {
-		return cap, cap != ColorNone
+		return cap, Detected //cap != ColorNone
 	}
 
 	//Query tput
 	if cap, ok := queryTput(); ok {
-		return cap, cap != ColorNone
+		return cap, Detected //cap != ColorNone
 	}
 	
 	//Failed to detect
-	return ColorNone, false
+	return ColorNone, Uncertain //false
 }
 
 

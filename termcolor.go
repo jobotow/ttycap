@@ -17,7 +17,7 @@ const (
 
 
 
-func Capability(stream ...*os.File) (ColorCap, bool) {
+func Capability(stream ...*os.File) (ColorCap, DetectionStatus) {
 	targetStream := os.Stdout
 	cachedArgs := os.Args[1:]
 	if len(stream) > 0 && stream[0] != nil {
@@ -25,12 +25,13 @@ func Capability(stream ...*os.File) (ColorCap, bool) {
 	}
 
 	if checkColorToggle(cachedArgs, "color", "=", colorPosArgs) || checkColorToggle(cachedArgs, "color", "=", colorAutoArgs){
-		cap, ok := detectColorCap(cachedArgs, targetStream)
-		if ok {
-			return cap, true
+		cap, status := detectColorCap(cachedArgs, targetStream)
+		if status == Detected {
+			return cap, Detected//true
 		}
 		//Forced color on
-		return Color16, true
+		//Terminal may not support ansi16 (dumb terminal). so return uncertain
+		return Color16, Uncertain//true
 	}
 	
 	return detectColorCap(cachedArgs, targetStream)
