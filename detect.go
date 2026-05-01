@@ -14,7 +14,7 @@ type DetectionStatus int
 const (
 	Detected DetectionStatus = iota
 	NotTTY
-	ExplicitDisable
+	ExplicitDisabled
 	Uncertain
 )
 
@@ -34,12 +34,12 @@ func detectColorCap(cachedArgs []string, stream *os.File) (ColorCap, DetectionSt
 	
 	//Check --no-color flags
 	if checkColorToggle(cachedArgs, "no-color", "=", colorNegArgs) || checkColorToggle(cachedArgs, "color", "=", colorNegArgs) || checkColorToggle(cachedArgs,"no-color", "=", colorPosArgs) {
-		return ColorNone, ExplicitDisable
+		return ColorNone, ExplicitDisabled
 	}
     
 	//Check NO_COLOR env variable
 	if _, exists := os.LookupEnv("NO_COLOR"); exists{
-		return ColorNone, ExplicitDisable
+		return ColorNone, ExplicitDisabled
 	}
 
 

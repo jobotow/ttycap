@@ -38,9 +38,15 @@ import (
 
 func main(){
      //Check if terminal supports color
-    _, ok := termcolor.Capability()
-    if ok {
-        fmt.Println("Hurray! Terminal understand colors")
+    cap , ok := termcolor.Capability()
+    if status == termcolor.Detected && cap >= termcolor.Color16 {
+        fmt.Println("Hurray! Terminal Understands colors")
+    } else if status == termcolor.NotTTy {
+        fmt.Println("Output is piped(color disabled)")
+    } else if status ==termcolor.ExplicitDisabled {
+        fmt.Println("Colors explicitly disabled by user")
+    } else if status == termcolor.Uncertain {
+        fmt.Println("Could not detect - try setting FORCE_COLOR=1")
     }
 }
 ```
@@ -56,7 +62,13 @@ import (
 )
 
 func main(){
-    cap, _ := termcolor.Capability()
+    cap, status := termcolor.Capability()
+
+    ///Only trust capability if detection was successful
+    if status != termcolor.Detected {
+        fmt.Println("Could not reliably detect color support")
+        return
+    }
 
     switch cap {
     case termcolor.ColorTrue:
