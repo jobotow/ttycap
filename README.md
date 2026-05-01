@@ -9,7 +9,7 @@
 
 ## Features
 - Detects terminal color capability (dumb, 16, 256, truecolor)
-- Parses `--color` and `--no-color` flags in both GNU and POSIX styles.
+- Automatically parses `--color` and `--no-color` flags in both GNU and POSIX styles.
 - Checks if color has being explicitly enabled or disabled via flags or environment variables.
 - Respects NO_COLOR and FORCE_COLOR environment variables.
 - Falls back to auto-detection when no color flags are provided
@@ -38,63 +38,10 @@ import (
 
 func main(){
      //Check if terminal supports color
-    termCol := termcolor.SupportsColor()
-    if termCol {
+    _, ok := termcolor.Capability()
+    if ok {
         fmt.Println("Hurray! Terminal understand colors")
     }
-}
-```
-
----
-
-### TTY detection
-
-```go
-package main
-import (
-    "fmt"
-    "github.com/phamio/termcolor"
-)
-
-func main(){
-     //Check if output is to terminal
-    if termcolor.IsTerminal() {
-        fmt.Println("I'm printed on the terminal")
-    }
-}
-```
-
----
-
-### Check color toggle (enabled/disabled)
-```go
-package main
-import (
-    "fmt"
-    "github.com/phamio/termcolor"
-)
-
-func main(){
-    //Check if terminal color is explicitly enabled via flags or environment variables
-    if termcolor.Enabled() {
-        fmt.Prinln("Terminal color is enabled")
-    }   
-
-    //Check if terminal color is explicitly disabled via flags or environment variables
-    if termcolor.Disabled() {
-        fmt.Prinln("Terminal color is disabled")
-    }   
-
-    
-    else {
-        //--color=auto used or no preference given
-        //termcolor decides from terminal
-        if term.SupportsColor(){
-            fmt.Println("Terminal wants colored texts")
-        } else{
-        fmt.Prinln("Terminal wants no colored texts")
-        }
-    }   
 }
 ```
 
@@ -109,7 +56,7 @@ import (
 )
 
 func main(){
-    cap := termcolor.Capability()
+    cap, _ := termcolor.Capability()
 
     switch cap {
     case termcolor.ColorTrue:
@@ -130,41 +77,8 @@ func main(){
 
 ---
 
-### Flag Parsing
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/phamio/termcolor"
-)
-
-func main() {
-    //Output format flag
-    format, found := termcolor.GetNextArg("format")
-    if found && termcolor.MatchNextArg(format, []string{"json", "text", "table"}){
-        fmt.Printf("Output format: %s\n", format)
-    }
-
-    //Log level
-    level, found := termcolor.GetNextArg("level", ":") //":" is the delimiter in case of --format:json
-    if found && termcolor.MatchNextArg(level, []string{"debug", "info", "error"}){
-        fmt.Printf("Log level: %s\n", level)
-    }
-
-    _, verbose := termcolor.GetNextArg("verbose")
-    if verbose{
-        fmt.Println("Verbose mode enabled")
-    }
-
-}
-```
-
----
-
 ## License
 Apache License 2.0 — see [LICENSE](LICENSE) file for details.
 
 ## About
-termcolor was originally built as the color detection and flag parsing foundation for [Inkstamp](https://github.com/inkstamp/inkstamp)
+termcolor was originally built as the color detection and color flag parsing foundation for [Inkstamp](https://github.com/inkstamp/inkstamp)

@@ -46,18 +46,6 @@ go test -v ./...
 ## Pull Request Guidelines 
 **Each pull request should address one issue**
 
----
-
-## Commit Structure
-
-```bash
-# Format
-<type>(<scope>): <description>
-
-# Examples
-fix(parser): treat negative numbers as flag values
-docs(readme): update installation instructions
-```
 
 ---
 

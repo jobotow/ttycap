@@ -2,7 +2,7 @@ package termcolor
 
 import (
 	"strings"
-	"os"
+	"unicode"
 )
 
 var (
@@ -12,11 +12,11 @@ var (
 )
 
 
-func checkColorToggle(flag, delimiter string, seqArgs []string) bool {
-	nextArg, boolean := GetNextArg(flag, delimiter)
+func checkColorToggle(cachedArgs []string, flag, delimiter string, seqArgs []string) bool {
+	nextArg, boolean := getNextArg(cachedArgs, flag, delimiter)
 	if boolean{
 		if nextArg != ""{
-		return MatchNextArg(nextArg, seqArgs)
+		return matchNextArg(nextArg, seqArgs)
 		}
 		return true
 	}
@@ -24,11 +24,8 @@ func checkColorToggle(flag, delimiter string, seqArgs []string) bool {
 }
 
 
-//=================================
-// PUBLIC API FOR FLAGS PARSING
-//=================================
 
-func MatchNextArg(arg string, seqArgs []string) bool {
+func matchNextArg(arg string, seqArgs []string) bool {
 	for _, value := range seqArgs {
 		if arg == value {
 			return true
@@ -39,13 +36,9 @@ func MatchNextArg(arg string, seqArgs []string) bool {
 
 
 
-func GetNextArg(flag string, delimiter ...string) (string, bool) {
-	delim := "="
-	if len(delimiter) > 0 {
-		delim = delimiter[0]
-	}
-	flagDelim := flag+delim
-	args := os.Args[1:]
+func getNextArg(cachedArgs []string, flag string, delimiter string) (string, bool) {
+	flagDelim := flag+delimiter
+	args := cachedArgs
 	for i, arg := range args{
 		cleanArg := strings.TrimLeft(arg, "-")
 		//GNU Style
@@ -57,8 +50,8 @@ func GetNextArg(flag string, delimiter ...string) (string, bool) {
 		if cleanArg == flag {
 		    if i+1 < len(args) {
 				nextArg := args[i+1]
-				//Check if next arg is not a flag
-				if !strings.HasPrefix(nextArg, "-"){
+				//Check if next arg is not a flag or is not a negative number or is not just a hyphen
+				if !strings.HasPrefix(nextArg, "-") || isNumeric(nextArg[1:]) || nextArg == "-" {
 					//Thats the value of given flag
 					return nextArg, true
 				}
@@ -69,4 +62,14 @@ func GetNextArg(flag string, delimiter ...string) (string, bool) {
 	}
 	//Flag wasn't present
 	return "", false
+}
+
+
+func isNumeric(s string) bool {
+	for _, r := range s {
+		if !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }

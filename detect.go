@@ -5,31 +5,76 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"golang.org/x/term"
 )
 
-	var colorTerm = []string{"screen", "xterm", "vt100", "color", "ansi", "cygwin", "linux"}
+	
 
 	
 
 
 
-func detectColorCap() ColorCap {
-	if cap, ok := checkTermEnv(); ok {
-		return cap
+func detectColorCap(cachedArgs []string, f *os.File) (ColorCap, bool) {
+	if !term.IsTerminal(int(f.Fd())) {
+		return ColorNone, false
 	}
 
+	//Stream is a tty, now determine level
+	
+	//Check --no-color flags
+	if checkColorToggle(cachedArgs, "no-color", "=", colorNegArgs) || checkColorToggle(cachedArgs, "color", "=", colorNegArgs) || checkColorToggle(cachedArgs,"no-color", "=", colorPosArgs) {
+		return ColorNone, false
+	}
+    
+	//Check NO_COLOR env variable
+	if _, exists := os.LookupEnv("NO_COLOR"); exists{
+		return ColorNone, false
+	}
+
+	//Check FORCE_COLOR level
+	if cap, ok := getForceColorLevel(); ok {
+		return cap, cap != ColorNone
+	}
+    
+	//CI Systems
+	if cap, ok := getCIColorLevel(); ok{
+		return cap, cap != ColorNone
+	}
+
+	if cap, ok := getKnownTerminal(); ok{
+		return cap, cap != ColorNone
+	}
+    
+	//Check TERM_PROGRAM
+	if cap, ok := checkTermProgram(); ok{
+		return cap, cap != ColorNone
+	}
+
+	//Check TERM
+	if cap, ok := checkTermEnv(); ok {
+		return cap, cap != ColorNone
+	}
+
+	//Query tput
 	if cap, ok := queryTput(); ok {
-		return cap
+		return cap, cap != ColorNone
 	}
 	
 	//Failed to detect
-	return ColorNone
+	return ColorNone, false
 }
 
+
+
+
+//================================
+// CHECKING TERMINAL ENVIRONMENT
+//================================
+
 func checkTermEnv() (ColorCap, bool) {
+
 	term := os.Getenv("TERM")
 	colorTerm := os.Getenv("COLORTERM")
-
 	//Check for explicit color number in $TERM or $COLORTERM
 	if supportsTrueColor(colorTerm) {
 		return ColorTrue, true
@@ -49,9 +94,86 @@ func checkTermEnv() (ColorCap, bool) {
 	return unknown, false
 }
 
-      
+
+//====================
+// FORCE_COLOR
+//====================
+
+func getForceColorLevel() (ColorCap, bool) {
+	value, exists := os.LookupEnv("FORCE_COLOR")
+	if !exists{
+		return unknown, false
+	}
+	switch value{
+	case "0":
+		return ColorNone, true
+	case "1":
+		return Color16, true
+	case "2":
+		return Color256, true
+	case "3":
+		return ColorTrue, true
+	default:
+		return unknown, false
+	}
+}
 
 
+//=================
+// CI SYSTEMS
+//=================
+
+func getCIColorLevel() (ColorCap, bool) {
+	if _, exists := os.LookupEnv("CI"); !exists{
+		return unknown, false
+	}
+	switch {
+	case envExists("GITHUB_ACTIONS"), envExists("TRAVIS"), envExists("GITLAB_CI"), envExists("CIRCLECI"):
+		return Color16, true
+	default:
+		return unknown, false
+	}
+}
+
+
+//=====================
+// KNOWN TERMINALS
+//=====================
+
+func getKnownTerminal() (ColorCap, bool) {
+	switch {
+	case envExists("WT_SESSION"), envExists("KONSOLE_VERSION"), envExists("ITERM_SESSION_ID"), envExists("VTE_VERSION"):
+		return ColorTrue, true
+	default:
+		return unknown, false
+	}
+}
+
+//====================
+// FORCE_COLOR
+//====================
+
+func checkTermProgram() (ColorCap, bool) {
+	value, exists := os.LookupEnv("TERM_PROGRAM")
+	if !exists{
+		return unknown, false
+	}
+	switch value{
+	case "iTerm.app", "WezTerm", "Hyper", "rio", "vscode", "tabby":
+		return ColorTrue, true
+	case "Apple_Terminal":
+		return Color256, true
+	default:
+		return unknown, false
+	}
+}
+
+
+
+
+//=====================
+// QUERYING TPUT
+//=====================
 
 func queryTput() (ColorCap, bool) {
 	//Check if tput exists
@@ -80,8 +202,9 @@ func queryTput() (ColorCap, bool) {
 
 
 
-
-
+//=======================================
+// MINI TERMINAL LEVEL SUPPORTS CHECKS
+//=======================================
 func supportsTrueColor(colorTerm string) bool {
 	return colorTerm == "truecolor" || colorTerm == "24bit"
 }
@@ -95,6 +218,7 @@ func supports16Color(term string) bool {
 }
 
 func supportsColor(term string) bool {
+	colorTerm := []string{"screen", "xterm", "vt100", "color", "ansi", "cygwin", "linux"}
 	for _, t := range colorTerm {
 		if strings.Contains(term, t) {
 			return true
@@ -105,6 +229,12 @@ func supportsColor(term string) bool {
  
 func supportsNone(term string) bool {
 	return term == "dumb" || strings.Contains(term, "mono")
+}
+
+//Helper
+func envExists(key string) bool {
+	_, exists := os.LookupEnv(key)
+	return exists
 }
 
 

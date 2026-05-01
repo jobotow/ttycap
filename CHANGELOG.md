@@ -1,10 +1,15 @@
 # Changelog
 All notable changes to termcolor will be documented in this file
 
-## [0.1.2] - 2026-04-30
+## [0.2.1] - 2026-04-30
+
+### Added
+- Color level detection is now made robust with additions such as (Force-color level detection, CI system detection and checkTermProgram)
 
 ### Fixed
-- Made `getNextArg()` and `matchNextArg()` exportable
+- Color flag parser now treats values (negative numbers and "-") as values instead of flags.
+- Dropped `SupportsColor()`, `Disabled()`, `Enabled()`, and `IsTerminal()` funtions,  for one function `Capability()`
+
 
 ---
 
