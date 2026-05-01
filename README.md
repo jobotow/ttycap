@@ -38,7 +38,7 @@ import (
 
 func main(){
      //Check if terminal supports color
-    cap , ok := termcolor.Capability()
+    cap , status := termcolor.Capability()
     if status == termcolor.Detected && cap >= termcolor.Color16 {
         fmt.Println("Hurray! Terminal Understands colors")
     } else if status == termcolor.NotTTy {
