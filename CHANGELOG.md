@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to termcolor will be documented in this file
 
-## [0.2.0] - 2026-04-30
+## [0.2.0] - 2026-05-02
 
 ### Added
 - Color level detection is now made robust with additions such as (Force-color level detection, CI system detection and checkTermProgram)

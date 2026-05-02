@@ -62,10 +62,10 @@ import (
 )
 
 func main(){
-    cap, status := termcolor.Capability()
+    cap, ok := termcolor.Capability()
 
     ///Only trust capability if detection was successful
-    if status != termcolor.Detected {
+    if !ok {
         fmt.Println("Could not reliably detect color support")
         return
     }
