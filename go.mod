@@ -1,4 +1,4 @@
-module termcolor
+module github.com/phamio/termcolor
 
 go 1.25.0
 

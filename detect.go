@@ -8,73 +8,54 @@ import (
 	"golang.org/x/term"
 )
 
-//Status types for detection results
-type DetectionStatus int
-
-const (
-	Detected DetectionStatus = iota
-	NotTTY
-	ExplicitDisabled
-	Uncertain
-)
-
 	
 
-	
-
-
-
-func detectColorCap(cachedArgs []string, stream *os.File) (ColorCap, DetectionStatus) {
-	//Check if TTY
-	if !term.IsTerminal(int(stream.Fd())) {
-		return ColorNone, NotTTY
-	}
-
-	//Stream is a tty, now determine level
-	
-	//Check --no-color flags
-	if checkColorToggle(cachedArgs, "no-color", "=", colorNegArgs) || checkColorToggle(cachedArgs, "color", "=", colorNegArgs) || checkColorToggle(cachedArgs,"no-color", "=", colorPosArgs) {
-		return ColorNone, ExplicitDisabled
-	}
-    
-	//Check NO_COLOR env variable
-	if _, exists := os.LookupEnv("NO_COLOR"); exists{
-		return ColorNone, ExplicitDisabled
-	}
-
+func detectColorCap(cachedArgs []string, cfg config) (ColorCap, bool) {
 
 	//Check FORCE_COLOR level
 	if cap, ok := getForceColorLevel(); ok {
-		return cap, Detected//cap != ColorNone
-	}
-    
-	//CI Systems
-	if cap, ok := getCIColorLevel(); ok{
-		return cap, Detected //cap != ColorNone
+		return cap, true
 	}
 
+	//Check NO_COLOR env variable
+	if _, exists := os.LookupEnv("NO_COLOR"); exists{
+		return ColorNone, true
+	}
+
+
+	//Check if TTY
+	if !term.IsTerminal(int(cfg.stream.Fd())) {
+		return ColorNone, true
+	}
+
+	//Stream is a tty, now determine level  
+	//CI Systems
+	    if cap, ok := getCIColorLevel(); ok{
+		    return cap, true
+	    }
+
 	if cap, ok := getKnownTerminal(); ok{
-		return cap, Detected //cap != ColorNone
+		return cap, true
 	}
     
 	//Check TERM_PROGRAM
 	if cap, ok := checkTermProgram(); ok{
-		return cap, Detected //cap != ColorNone
+		return cap, true
 	}
 
 	//Check TERM
 	if cap, ok := checkTermEnv(); ok {
-		return cap, Detected //cap != ColorNone
+		return cap, true
 	}
 
 	//Query tput
 	if cap, ok := queryTput(); ok {
-		return cap, Detected //cap != ColorNone
+		return cap, true
 	}
 	
-	//Failed to detect
-	return ColorNone, Uncertain //false
+	return ColorNone, true
 }
+
 
 
 

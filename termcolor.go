@@ -1,4 +1,5 @@
 package termcolor
+//What of detecting capability once and caching it
 
 import (
 	"os"
@@ -14,25 +15,62 @@ const (
 	ColorTrue ColorCap = 16777216
 )
 
+type Option func(*config)
+type  config struct {
+	stream *os.File
+	sniffFlags bool
+}
 
-
-
-func Capability(stream ...*os.File) (ColorCap, DetectionStatus) {
-	targetStream := os.Stdout
-	cachedArgs := os.Args[1:]
-	if len(stream) > 0 && stream[0] != nil {
-		targetStream = stream[0]
+func defaultConfig() config {
+	return config{
+		stream: os.Stdout,
+		sniffFlags: true,
 	}
+}
 
+func Stream(s *os.File) Option{
+	return func(c *config) {
+		c.stream = s 
+	}
+}
+
+func SniffFlagToggle(sniff bool) Option {
+	return func(c *config) {
+		c.sniffFlags = sniff
+	}
+}
+
+
+func Capability(opts ...Option) (ColorCap, bool){
+	cachedArgs := os.Args[1:]
+	cfg := defaultConfig()
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+	if cfg.sniffFlags {
+		getColorFlagCap(cachedArgs, cfg)
+	}
+	return detectColorCap(cachedArgs, cfg)
+}
+
+
+
+
+
+func getColorFlagCap(cachedArgs []string, cfg config)(ColorCap, bool) {
 	if checkColorToggle(cachedArgs, "color", "=", colorPosArgs) || checkColorToggle(cachedArgs, "color", "=", colorAutoArgs){
-		cap, status := detectColorCap(cachedArgs, targetStream)
-		if status == Detected {
-			return cap, Detected//true
+		cap, ok := detectColorCap(cachedArgs, cfg)
+		if ok {
+			return cap, true
 		}
 		//Forced color on
-		//Terminal may not support ansi16 (dumb terminal). so return uncertain
-		return Color16, Uncertain//true
-	}
+		return Color16, true
+	} 
 	
-	return detectColorCap(cachedArgs, targetStream)
+	//Check --no-color flags
+    if checkColorToggle(cachedArgs, "no-color", "=", colorNegArgs) || checkColorToggle(cachedArgs, "color", "=", colorNegArgs) || checkColorToggle(cachedArgs,"no-color", "=", colorPosArgs) {
+	    return ColorNone, true
+	}
+	return ColorNone, true
+
 }

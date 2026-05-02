@@ -11,8 +11,8 @@ func TestCapability(t *testing.T) {
 }
 
 func TestCapability_ColorSupport(t *testing.T) {
-	caps, status := Capability()
-	if status != Uncertain && caps == ColorNone {
+	caps, ok := Capability()
+	if ok && caps == ColorNone {
 		t.Log("Terminal doesn't support color")
 	}
 }
