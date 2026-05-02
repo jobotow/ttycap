@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to termcolor will be documented in this file
 
+## [0.2.1] - 2026-05-02
+
+### Fixed
+- Fixed module path
+
 ## [0.2.0] - 2026-05-02
 
 ### Added
