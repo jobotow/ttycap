@@ -53,11 +53,12 @@ func main(){
 package main
 import (
     "fmt"
+    "os"
     "codeberg.org/jobotow/ttycap"
 )
 
 func main(){
-    cap := ttycap.Capability()
+    cap := ttycap.Query(os.Stdout)
 
     switch cap {
     case ttycap.ColorANSI16m:
