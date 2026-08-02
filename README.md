@@ -35,11 +35,9 @@ import (
 
 func main(){
      //Check if terminal supports color
-    cap := ttycap.Query(os.Stdout)
+    cap := ttycap.QueryColorCap(os.Stdout)
     if cap >= ttycap.ColorANSI16 {
         fmt.Println("Hurray! Terminal Understands colors")
-    } else if cap != ttycap.IsTTY {
-        fmt.Println("Output is piped(color disabled)")
     } else {
         fmt.Println("Nothing to see here")
     }
@@ -58,7 +56,7 @@ import (
 )
 
 func main(){
-    cap := ttycap.Query(os.Stdout)
+    cap := ttycap.QueryColorCap(os.Stdout)
 
     switch cap {
     case ttycap.ColorANSI16m:
