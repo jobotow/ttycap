@@ -23,7 +23,7 @@ go get -u codeberg.org/jobotow/ttycap
 
 ## Usage
 
-### Check color support
+### Check color support and tty
 
 ```go
 package main
