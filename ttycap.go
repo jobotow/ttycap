@@ -23,14 +23,19 @@ const (
 )
 
 
-func Query(stream *os.File) Capabilities{
-	return Capabilities{
-		IsTTY: term.IsTerminal(int(stream.Fd())),
-		ColorCap: detectColorCap(stream)
-	}
+func QueryColorCap(stream *os.File) ColorCap{
+	//return Capabilities{
+		//IsTTY: term.IsTerminal(int(stream.Fd())),
+		return detectColorCap(stream)
+	//}
 }
 
 
+// will focus on capability detection 
+// QueryUnicodeCap(*os.File)
+//QueryAll(*os.File) //for Capabilities
+
+//IsTYY might get dropped 
 func IsTTY(stream *os.File) bool {
 	return term.IsTerminal(int(stream.Fd()))
 }
