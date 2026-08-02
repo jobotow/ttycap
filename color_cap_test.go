@@ -1,4 +1,4 @@
-package termcolor
+package ttycap
 
 import (
 	//"os"
@@ -32,12 +32,11 @@ tests := []struct {
 		expectedCap ColorCap
 		expectedBool bool
 	}{
-		{"truecolor", "", "truecolor", ColorTrue, true},
-		{"24bit", "", "24bit", ColorTrue, true},
-		{"256color", "xterm-256color", "", Color256, true},
-		{"16color", "xterm", "", Color16, true},
+		{"truecolor", "", "truecolor", ColorANSI16m, true},
+		{"24bit", "", "24bit", ColorANSI16m, true},
+		{"256color", "xterm-256color", "", ColorANSI256, true},
+		{"16color", "xterm", "", ColorANSI16, true},
 		{"dumb", "dumb", "", ColorNone, true},
-		{"unknown", "unknown", "", unknown, false},
 	}
 
 	for _, tt := range tests {

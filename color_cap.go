@@ -1,4 +1,4 @@
-package termcolor
+package ttycap
 
 import (
 	"os"
@@ -8,52 +8,51 @@ import (
 	"golang.org/x/term"
 )
 
-	
 
-func detectColorCap(cachedArgs []string, cfg config) (ColorCap, bool) {
+func detectColorCap(stream *os.File) ColorCap {
 
 	//Check FORCE_COLOR level
 	if cap, ok := getForceColorLevel(); ok {
-		return cap, true
+		return cap
 	}
 
 	//Check NO_COLOR env variable
 	if _, exists := os.LookupEnv("NO_COLOR"); exists{
-		return ColorNone, true
+		return ColorNone
 	}
 
 
 	//Check if TTY
-	if !term.IsTerminal(int(cfg.stream.Fd())) {
-		return ColorNone, true
+	if !term.IsTerminal(int(stream.Fd())) {
+		return ColorNone
 	}
 
 	//Stream is a tty, now determine level  
 	//CI Systems
 	    if cap, ok := getCIColorLevel(); ok{
-		    return cap, true
+		    return cap
 	    }
 
 	if cap, ok := getKnownTerminal(); ok{
-		return cap, true
+		return cap
 	}
     
 	//Check TERM_PROGRAM
 	if cap, ok := checkTermProgram(); ok{
-		return cap, true
+		return cap
 	}
 
 	//Check TERM
 	if cap, ok := checkTermEnv(); ok {
-		return cap, true
+		return cap
 	}
 
 	//Query tput
 	if cap, ok := queryTput(); ok {
-		return cap, true
+		return cap
 	}
 	
-	return ColorNone, true
+	return ColorNone
 }
 
 
@@ -70,13 +69,14 @@ func checkTermEnv() (ColorCap, bool) {
 	colorTerm := os.Getenv("COLORTERM")
 	//Check for explicit color number in $TERM or $COLORTERM
 	if supportsTrueColor(colorTerm) {
-		return ColorTrue, true
+		return ColorANSI16m
+		, true
 	}
 	if supports256Color(term){
-		return Color256, true
+		return ColorANSI256, true
 	}
 	if supports16Color(term){
-		return Color16, true
+		return ColorANSI16, true
 	}
 
 	if supportsNone(term){
@@ -84,7 +84,7 @@ func checkTermEnv() (ColorCap, bool) {
 	}
 
 	//Detection failed
-	return unknown, false
+	return ColorNone, false
 }
 
 
@@ -95,19 +95,19 @@ func checkTermEnv() (ColorCap, bool) {
 func getForceColorLevel() (ColorCap, bool) {
 	value, exists := os.LookupEnv("FORCE_COLOR")
 	if !exists{
-		return unknown, false
+		return ColorNone, false
 	}
 	switch value{
 	case "0":
 		return ColorNone, true
 	case "1":
-		return Color16, true
+		return ColorANSI16, true
 	case "2":
-		return Color256, true
+		return ColorANSI256, true
 	case "3":
-		return ColorTrue, true
+		return ColorANSI16m, true
 	default:
-		return unknown, false
+		return ColorNone, false
 	}
 }
 
@@ -118,13 +118,13 @@ func getForceColorLevel() (ColorCap, bool) {
 
 func getCIColorLevel() (ColorCap, bool) {
 	if _, exists := os.LookupEnv("CI"); !exists{
-		return unknown, false
+		return ColorNone, false
 	}
 	switch {
 	case envExists("GITHUB_ACTIONS"), envExists("TRAVIS"), envExists("GITLAB_CI"), envExists("CIRCLECI"):
-		return Color16, true
+		return ColorANSI16, true
 	default:
-		return unknown, false
+		return ColorNone, false
 	}
 }
 
@@ -136,9 +136,9 @@ func getCIColorLevel() (ColorCap, bool) {
 func getKnownTerminal() (ColorCap, bool) {
 	switch {
 	case envExists("WT_SESSION"), envExists("KONSOLE_VERSION"), envExists("ITERM_SESSION_ID"), envExists("VTE_VERSION"):
-		return ColorTrue, true
+		return ColorANSI16m, true
 	default:
-		return unknown, false
+		return ColorNone, false
 	}
 }
 
@@ -149,15 +149,15 @@ func getKnownTerminal() (ColorCap, bool) {
 func checkTermProgram() (ColorCap, bool) {
 	value, exists := os.LookupEnv("TERM_PROGRAM")
 	if !exists{
-		return unknown, false
+		return ColorNone, false
 	}
 	switch value{
 	case "iTerm.app", "WezTerm", "Hyper", "rio", "vscode", "tabby":
-		return ColorTrue, true
+		return ColorANSI16m, true
 	case "Apple_Terminal":
-		return Color256, true
+		return ColorANSI256, true
 	default:
-		return unknown, false
+		return ColorNone, false
 	}
 }
 
@@ -173,19 +173,19 @@ func queryTput() (ColorCap, bool) {
 	_, err := exec.LookPath("tput")
 	if err != nil {
 		//Detection failed
-		return unknown, false
+		return ColorNone, false
 	}
     
 	//Run tput colors
 	cmd := exec.Command("tput", "colors")
 	out, err := cmd.Output()
 	if err != nil {
-		return unknown, false
+		return ColorNone, false
 	}
 	
 	colors, err := strconv.Atoi(strings.TrimSpace(string(out)))
 	if err != nil || colors <= 0 {
-		return unknown, false
+		return ColorNone, false
 	}
 
 	return ColorCap(colors), true

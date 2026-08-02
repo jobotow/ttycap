@@ -1,5 +1,24 @@
 # Changelog
-All notable changes to termcolor will be documented in this file
+All notable changes to ttycap will be documented in this file
+
+
+## [0.3.0] - 2026-08-02
+
+### Renamed
+- `termcolor` was changed to `ttycap` because the library is being set to grow beyond terminal color detection.
+
+### Fixed
+- Fixed module path
+
+### Added
+- TTY detection as a public function
+
+### Removed
+- Color flag parsing and anything in relation to it
+
+
+---
+
 
 ## [0.2.1] - 2026-05-02
 
