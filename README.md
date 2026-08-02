@@ -1,4 +1,4 @@
-# TtyCap
+# TTYCap
 **ttycap** tells you what colors your terminal can display and at what level or depth
 
 **It answers questions like**
